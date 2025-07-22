@@ -8,16 +8,25 @@ function clearAndReload() {
     loadDefaultData();
     showModal('Datos restablecidos a los valores por defecto.');
 }
+window.clearAndReload = clearAndReload;
 let currentPassword = '';
 let currentData = null;
 
-// Cargar datos por defecto desde defaultData.json
+// Cargar datos por defecto desde defaultData.json con manejo de errores
 async function loadDefaultData() {
-    const res = await fetch('defaultData.json');
-    const data = await res.json();
-    currentData = data;
-    fillForm(data);
-    updateTotals();
+    try {
+        const res = await fetch('defaultData.json');
+        if (!res.ok) throw new Error('No se pudo cargar defaultData.json');
+        const data = await res.json();
+        currentData = data;
+        fillForm(data);
+        updateTotals();
+    } catch (err) {
+        showModal('Error cargando datos por defecto: ' + (err.message || err));
+        // Limpiar el formulario si falla
+        fillForm({});
+        updateTotals();
+    }
 }
 
 // Auto-save to localStorage when data changes
@@ -53,7 +62,6 @@ function closeModal() {
     document.getElementById('modal').classList.add('hidden');
 }
 
-// Save file (download JSON to computer)
 function saveFile() {
     const data = getFormData();
     if (!data || !data.items || data.items.length === 0) {
@@ -76,7 +84,6 @@ function saveFile() {
     showModal('File saved successfully!');
 }
 
-// Exportar el JSON actual en memoria (sin descargar, solo para copiar o debug)
 function exportJSONMemory() {
     if (!currentData) {
         showModal('No data in memory.');
@@ -88,7 +95,6 @@ function exportJSONMemory() {
     showModal('JSON copied to clipboard!');
 }
 
-// Load file from computer
 function loadFile(event) {
     let password = document.getElementById('password').value;
     if (!password) {
@@ -191,7 +197,6 @@ function tryLoadFromStorage() {
     }
 }
 
-// Dynamic table functions
 function addRow() {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td><input name="concept" type="text" class="p-2 w-full bg-transparent border-b border-gray-200" /></td>
@@ -230,6 +235,15 @@ function updateTotals() {
     });
     document.getElementById('totalAmount').textContent = "$" + (total ? total.toLocaleString('es-CO') : '0');
 }
+
+// Registrar funciones globales para el HTML
+window.clearAndReload = clearAndReload;
+window.saveFile = saveFile;
+window.exportJSONMemory = exportJSONMemory;
+window.loadFile = loadFile;
+window.addRow = addRow;
+window.deleteRow = deleteRow;
+window.updateRowTotal = updateRowTotal;
 
 // Event listeners
 window.addEventListener('DOMContentLoaded', async () => {
