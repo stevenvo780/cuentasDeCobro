@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+
+# local environment files
+.env
+
+# logs
+npm-debug.log*
+
