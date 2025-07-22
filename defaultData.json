@@ -1,0 +1,26 @@
+{
+  "number": "006",
+  "name": "Juan Pérez Gómez",
+  "id": "C.C. 1234567890",
+  "billTo": "Juan Pérez Gómez",
+  "billToId": "C.C. 1234567890 de Ciudad Ejemplo",
+  "billToAddress": "Calle Falsa 123",
+  "billToCity": "Ciudad Ejemplo, Colombia",
+  "billToPhone": "3001234567",
+  "clientName": "Critertec Educación SAS",
+  "clientId": "NIT 800.152.913-3",
+  "issueDate": "2025-07-21",
+  "period": "13/06/2025 - 20/07/2025",
+  "items": [
+    {
+      "concept": "Servicios de Desarrollo y DevOps",
+      "hours": 78,
+      "rate": 50000
+    }
+  ],
+  "bank": "Bancolombia",
+  "accountType": "Ahorros",
+  "accountNumber": "0000000000",
+  "declaration": "Certifico bajo la gravedad de juramento que los aportes en salud corresponden a los ingresos provenientes del pago sujeto a retención.\nEn cumplimiento a la Ley 1819 de 2016, Artículo 17, 383 del Estatuto Tributario, se declara que no se tienen contratados 2 o más empleados.",
+  "signature": "Juan Pérez Gómez"
+}
