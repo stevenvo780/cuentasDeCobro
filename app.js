@@ -94,6 +94,31 @@ function exportJSONMemory() {
     showModal('JSON copied to clipboard!');
 }
 
+// Export invoice as an image using html2canvas
+function saveImage() {
+    const invoice = document.getElementById('invoice');
+    if (!invoice) {
+        showModal('Invoice element not found.');
+        return;
+    }
+    html2canvas(invoice).then(canvas => {
+        canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cuenta_cobro.png';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        });
+    }).catch(err => {
+        showModal('Error generating image: ' + (err.message || err));
+    });
+}
+
 function loadFile(evt) {
     let password = document.getElementById('password').value;
     if (!password) {
@@ -260,6 +285,7 @@ async function init() {
     document.getElementById('exportBtn').addEventListener('click', exportJSONMemory);
     document.getElementById('loadInput').addEventListener('change', loadFile);
     document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('imageBtn').addEventListener('click', saveImage);
     document.getElementById('clearBtn').addEventListener('click', clearAndReload);
     document.getElementById('modalOk').addEventListener('click', closeModal);
     document.getElementById('addRowBtn').addEventListener('click', () => addRow());

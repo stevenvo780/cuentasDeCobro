@@ -24,6 +24,7 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div id="app-controls" class="fixed top-0 left-0 w-full bg-white shadow z-50 flex flex-wrap gap-2 items-center justify-center p-4">
@@ -35,6 +36,7 @@
             <input type="file" id="loadInput" accept="application/json" style="display:none">
         </label>
         <button id="printBtn" class="bg-indigo-700 text-white px-3 py-1 rounded hover:bg-indigo-800">Print</button>
+        <button id="imageBtn" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Image</button>
         <button id="clearBtn" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Clear</button>
         <span class="ml-4 text-xs text-gray-500">Your data is encrypted locally</span>
     </div>
@@ -46,7 +48,7 @@
             <button id="modalOk" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">OK</button>
         </div>
     </div>
-    <div class="w-full max-w-4xl mx-auto bg-white shadow-2xl rounded-lg my-8 p-8 md:p-12 mt-24">
+    <div id="invoice" class="w-full max-w-4xl mx-auto bg-white shadow-2xl rounded-lg my-8 p-8 md:p-12 mt-24">
         <form id="cuentaForm" autocomplete="off">
         <!-- Header Section -->
         <header class="flex justify-between items-start mb-10">
