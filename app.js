@@ -37,6 +37,8 @@ function autoSave() {
     localStorage.setItem('encryptedBill', CryptoJS.AES.encrypt(json, currentPassword).toString());
 }
 
+import { autoResizeTextarea, toggleExportElements, calculateRowTotal } from './utils.js';
+
 function getFormData() {
     const form = document.getElementById('cuentaForm');
     const data = Object.fromEntries(new FormData(form));
@@ -94,6 +96,9 @@ function exportJSONMemory() {
     showModal('JSON copied to clipboard!');
 }
 
+// Show or hide controls that should not appear in exported images
+
+
 // Export invoice as an image using html2canvas
 function saveImage() {
     const invoice = document.getElementById('invoice');
@@ -101,6 +106,7 @@ function saveImage() {
         showModal('Invoice element not found.');
         return;
     }
+    toggleExportElements(false);
     html2canvas(invoice).then(canvas => {
         canvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
@@ -116,6 +122,8 @@ function saveImage() {
         });
     }).catch(err => {
         showModal('Error generating image: ' + (err.message || err));
+    }).finally(() => {
+        toggleExportElements(true);
     });
 }
 
@@ -161,6 +169,7 @@ function fillForm(data) {
         if (field) {
             if (field.tagName === 'TEXTAREA') {
                 field.value = value || '';
+                autoResizeTextarea(field);
             } else if (field.type === 'date') {
                 // Si es date, asegurarse de que el valor esté en formato yyyy-mm-dd
                 if (value && value.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -232,9 +241,9 @@ function deleteRow(tr) {
 }
 
 function updateRowTotal(tr) {
-    const hours = parseFloat(tr.querySelector('input[name=hours]').value) || 0;
-    const rate = parseFloat(tr.querySelector('input[name=rate]').value) || 0;
-    const total = hours * rate;
+    const hours = tr.querySelector('input[name=hours]').value;
+    const rate = tr.querySelector('input[name=rate]').value;
+    const total = calculateRowTotal(hours, rate);
     tr.querySelector('.row-total').textContent = total ? "$" + total.toLocaleString('es-CO') : '';
     updateTotals();
     autoSave();
@@ -294,4 +303,12 @@ async function init() {
         autoSave();
     });
     document.getElementById('password').addEventListener('input', tryLoadFromStorage);
+
+    // Auto resize textareas
+document.querySelectorAll('textarea').forEach(t => {
+        autoResizeTextarea(t);
+        t.addEventListener('input', () => autoResizeTextarea(t));
+    });
 }
+
+export { autoResizeTextarea, toggleExportElements, calculateRowTotal };
