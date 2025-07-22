@@ -8,14 +8,13 @@ function clearAndReload() {
     loadDefaultData();
     showModal('Datos restablecidos a los valores por defecto.');
 }
-window.clearAndReload = clearAndReload;
 let currentPassword = '';
 let currentData = null;
 
 // Cargar datos por defecto desde defaultData.json con manejo de errores
 async function loadDefaultData() {
     try {
-        const res = await fetch('defaultData.json');
+        const res = await fetch(new URL('defaultData.json', import.meta.url));
         if (!res.ok) throw new Error('No se pudo cargar defaultData.json');
         const data = await res.json();
         currentData = data;
@@ -95,18 +94,18 @@ function exportJSONMemory() {
     showModal('JSON copied to clipboard!');
 }
 
-function loadFile(event) {
+function loadFile(evt) {
     let password = document.getElementById('password').value;
     if (!password) {
         // Si hay una sesión previa, usarla
         password = sessionStorage.getItem('cuentaPassword') || '';
         if (!password) {
             showModal('Enter a password first to encrypt your data.');
-            event.target.value = '';
+            evt.target.value = '';
             return;
         }
     }
-    const file = event.target.files[0];
+    const file = evt.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -124,7 +123,7 @@ function loadFile(event) {
         }
     };
     reader.readAsText(file);
-    event.target.value = '';
+    evt.target.value = '';
 }
 
 // Fill form with data
@@ -164,15 +163,7 @@ function fillForm(data) {
     // Load items
     const tbody = document.getElementById('itemsBody');
     tbody.innerHTML = '';
-    (data.items || []).forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td><input name="concept" type="text" class="p-2 w-full bg-transparent border-b border-gray-200" value="${item.concept || ''}" /></td>
-            <td><input name="hours" type="number" class="p-2 w-20 text-center bg-transparent border-b border-gray-200" value="${item.hours || ''}" min="0" onchange="updateRowTotal(this)" /></td>
-            <td><input name="rate" type="number" class="p-2 w-28 text-right bg-transparent border-b border-gray-200" value="${item.rate || ''}" min="0" onchange="updateRowTotal(this)" /></td>
-            <td class="text-right font-semibold"><span class="row-total"></span></td>
-            <td class="no-print"><button type="button" onclick="deleteRow(this)" class="text-red-500">🗑️</button></td>`;
-        tbody.appendChild(tr);
-    });
+    (data.items || []).forEach(addRow);
     updateTotals();
 }
 
@@ -197,30 +188,41 @@ function tryLoadFromStorage() {
     }
 }
 
-function addRow() {
+function addRow(item = {}) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><input name="concept" type="text" class="p-2 w-full bg-transparent border-b border-gray-200" /></td>
-        <td><input name="hours" type="number" class="p-2 w-20 text-center bg-transparent border-b border-gray-200" value="0" min="0" onchange="updateRowTotal(this)" /></td>
-        <td><input name="rate" type="number" class="p-2 w-28 text-right bg-transparent border-b border-gray-200" value="0" min="0" onchange="updateRowTotal(this)" /></td>
+    tr.innerHTML = `<td><input name="concept" type="text" class="p-2 w-full bg-transparent border-b border-gray-200" value="${item.concept || ''}" /></td>
+        <td><input name="hours" type="number" class="p-2 w-20 text-center bg-transparent border-b border-gray-200" value="${item.hours || 0}" min="0" /></td>
+        <td><input name="rate" type="number" class="p-2 w-28 text-right bg-transparent border-b border-gray-200" value="${item.rate || 0}" min="0" /></td>
         <td class="text-right font-semibold"><span class="row-total"></span></td>
-        <td class="no-print"><button type="button" onclick="deleteRow(this)" class="text-red-500">🗑️</button></td>`;
+        <td class="no-print"><button type="button" class="text-red-500 delete-row">🗑️</button></td>`;
     document.getElementById('itemsBody').appendChild(tr);
+    updateRowTotal(tr);
+    attachRowListeners(tr);
 }
 
-function deleteRow(btn) {
-    btn.closest('tr').remove();
+function deleteRow(tr) {
+    tr.remove();
     updateTotals();
     autoSave();
 }
 
-function updateRowTotal(input) {
-    const tr = input.closest('tr');
+function updateRowTotal(tr) {
     const hours = parseFloat(tr.querySelector('input[name=hours]').value) || 0;
     const rate = parseFloat(tr.querySelector('input[name=rate]').value) || 0;
     const total = hours * rate;
     tr.querySelector('.row-total').textContent = total ? "$" + total.toLocaleString('es-CO') : '';
     updateTotals();
     autoSave();
+}
+
+function attachRowListeners(tr) {
+    tr.querySelector('input[name=hours]')?.addEventListener('input', () => updateRowTotal(tr));
+    tr.querySelector('input[name=rate]')?.addEventListener('input', () => updateRowTotal(tr));
+    tr.querySelector('.delete-row')?.addEventListener('click', () => {
+        tr.remove();
+        updateTotals();
+        autoSave();
+    });
 }
 
 function updateTotals() {
@@ -236,18 +238,10 @@ function updateTotals() {
     document.getElementById('totalAmount').textContent = "$" + (total ? total.toLocaleString('es-CO') : '0');
 }
 
-// Registrar funciones globales para el HTML
-window.clearAndReload = clearAndReload;
-window.saveFile = saveFile;
-window.exportJSONMemory = exportJSONMemory;
-window.loadFile = loadFile;
-window.addRow = addRow;
-window.deleteRow = deleteRow;
-window.updateRowTotal = updateRowTotal;
+// Inicialización y manejo de eventos
+document.addEventListener('DOMContentLoaded', init);
 
-// Event listeners
-window.addEventListener('DOMContentLoaded', async () => {
-    // Si hay sesión previa, restaurar
+async function init() {
     const sessionPass = sessionStorage.getItem('cuentaPassword');
     const sessionData = sessionStorage.getItem('cuentaData');
     const hasEncrypted = localStorage.getItem('encryptedBill');
@@ -256,17 +250,22 @@ window.addEventListener('DOMContentLoaded', async () => {
         currentData = JSON.parse(sessionData);
         fillForm(currentData);
     } else if (hasEncrypted) {
-        // Si hay datos encriptados pero no sesión, esperar a que el usuario ingrese la clave
-        await loadDefaultData(); // Para que el formulario no esté vacío
+        await loadDefaultData();
     } else {
-        // Si no hay nada, cargar los datos por defecto (incluye items)
         await loadDefaultData();
     }
-    // Limpiar el total al inicio si no hay items
     updateTotals();
+
+    document.getElementById('saveBtn').addEventListener('click', saveFile);
+    document.getElementById('exportBtn').addEventListener('click', exportJSONMemory);
+    document.getElementById('loadInput').addEventListener('change', loadFile);
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('clearBtn').addEventListener('click', clearAndReload);
+    document.getElementById('modalOk').addEventListener('click', closeModal);
+    document.getElementById('addRowBtn').addEventListener('click', () => addRow());
     document.getElementById('cuentaForm').addEventListener('input', () => {
         updateTotals();
         autoSave();
     });
     document.getElementById('password').addEventListener('input', tryLoadFromStorage);
-});
+}

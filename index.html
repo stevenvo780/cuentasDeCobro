@@ -28,14 +28,14 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div id="app-controls" class="fixed top-0 left-0 w-full bg-white shadow z-50 flex flex-wrap gap-2 items-center justify-center p-4">
         <input id="password" type="password" placeholder="Access key" class="border rounded px-2 py-1 mr-2" style="min-width:150px;">
-        <button onclick="saveFile()" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Save</button>
-        <button onclick="exportJSONMemory()" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Export JSON</button>
+        <button id="saveBtn" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Save</button>
+        <button id="exportBtn" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Export JSON</button>
         <label class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 cursor-pointer">
             Load
-            <input type="file" id="loadInput" accept="application/json" style="display:none" onchange="loadFile(event)">
+            <input type="file" id="loadInput" accept="application/json" style="display:none">
         </label>
-        <button onclick="window.print()" class="bg-indigo-700 text-white px-3 py-1 rounded hover:bg-indigo-800">Print</button>
-        <button onclick="clearAndReload()" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Clear</button>
+        <button id="printBtn" class="bg-indigo-700 text-white px-3 py-1 rounded hover:bg-indigo-800">Print</button>
+        <button id="clearBtn" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Clear</button>
         <span class="ml-4 text-xs text-gray-500">Your data is encrypted locally</span>
     </div>
     
@@ -43,7 +43,7 @@
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-md mx-4">
             <p id="modal-message" class="text-gray-800 mb-4"></p>
-            <button onclick="closeModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">OK</button>
+            <button id="modalOk" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">OK</button>
         </div>
     </div>
     <div class="w-full max-w-4xl mx-auto bg-white shadow-2xl rounded-lg my-8 p-8 md:p-12 mt-24">
@@ -98,7 +98,7 @@
                         <!-- Rows will be loaded by JS -->
                     </tbody>
                 </table>
-                <button type="button" onclick="addRow()" class="mt-2 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 no-print">Agregar Concepto</button>
+                <button id="addRowBtn" type="button" class="mt-2 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 no-print">Agregar Concepto</button>
             </div>
         </div>
         <!-- Total and Payment Information Section -->
@@ -139,5 +139,6 @@
         </footer>
         </form>
     </div>
+    <script type="module" src="./app.js"></script>
 </body>
 </html>
