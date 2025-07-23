@@ -16,11 +16,39 @@
             #app-controls { display: none !important; }
             .no-print { display: none !important; }
             .print-hide { display: none !important; }
-            body { background: white !important; }
+            body {
+                background: white !important;
+                font-size: 12px;
+                line-height: 1.25;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .shadow-2xl { box-shadow: none !important; }
             .rounded-lg { border-radius: 0 !important; }
             .mt-24 { margin-top: 0 !important; }
             .my-8 { margin: 0 !important; }
+            .overflow-x-auto { overflow: visible !important; }
+            #invoice {
+                width: 180mm !important;
+                max-width: 180mm !important;
+                margin: 0 auto !important;
+                padding: 10mm !important;
+                box-sizing: border-box !important;
+            }
+            .text-3xl { font-size: 20px !important; }
+            .text-xl { font-size: 16px !important; }
+            .text-lg { font-size: 14px !important; }
+            .text-sm { font-size: 11px !important; }
+            .text-xs { font-size: 10px !important; }
+            header, footer, .mb-10, .mt-8, .mt-12, .mb-12 { margin-top: 6mm !important; margin-bottom: 6mm !important; }
+            table tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+        @page {
+            size: A4;
+            margin: 15mm;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
