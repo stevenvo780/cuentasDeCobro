@@ -107,7 +107,12 @@ function saveImage() {
         return;
     }
     toggleExportElements(false);
-    html2canvas(invoice).then(canvas => {
+    html2canvas(invoice, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+    }).then(canvas => {
         canvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
