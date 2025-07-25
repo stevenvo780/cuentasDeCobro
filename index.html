@@ -13,15 +13,17 @@
             font-family: 'Inter', sans-serif;
         }
         @media print {
-            #app-controls { display: none !important; }
+            #app-controls, #modal { display: none !important; }
             .no-print { display: none !important; }
             .print-hide { display: none !important; }
             body {
                 background: white !important;
-                font-size: 12px;
-                line-height: 1.25;
+                font-size: 11px;
+                line-height: 1.2;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                margin: 0;
+                padding: 0;
             }
             .shadow-2xl { box-shadow: none !important; }
             .rounded-lg { border-radius: 0 !important; }
@@ -29,30 +31,61 @@
             .my-8 { margin: 0 !important; }
             .overflow-x-auto { overflow: visible !important; }
             #invoice {
-                width: 180mm !important;
-                max-width: 180mm !important;
-                margin: 0 auto !important;
-                padding: 10mm !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 8mm !important;
                 box-sizing: border-box !important;
+                break-inside: avoid;
             }
-            .text-3xl { font-size: 20px !important; }
-            .text-xl { font-size: 16px !important; }
-            .text-lg { font-size: 14px !important; }
-            .text-sm { font-size: 11px !important; }
-            .text-xs { font-size: 10px !important; }
-            header, footer, .mb-10, .mt-8, .mt-12, .mb-12 { margin-top: 6mm !important; margin-bottom: 6mm !important; }
+            .text-3xl { font-size: 18px !important; }
+            .text-xl { font-size: 14px !important; }
+            .text-lg { font-size: 12px !important; }
+            .text-sm { font-size: 10px !important; }
+            .text-xs { font-size: 9px !important; }
+            
+            /* Reducir márgenes y espaciado */
+            header { margin-bottom: 4mm !important; }
+            .mb-10 { margin-bottom: 4mm !important; }
+            .mb-12 { margin-bottom: 4mm !important; }
+            .mt-8 { margin-top: 3mm !important; }
+            .mt-12 { margin-top: 4mm !important; }
+            .mb-4 { margin-bottom: 2mm !important; }
+            .p-4 { padding: 2mm !important; }
+            .p-6 { padding: 3mm !important; }
+            .gap-8 { gap: 2mm !important; }
+            
+            /* Tabla más compacta */
             table tr {
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
+            table th, table td {
+                padding: 1.5mm !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* Footer más compacto */
+            footer {
+                margin-top: 3mm !important;
+                padding-top: 2mm !important;
+            }
+            
+            /* Inputs más pequeños en impresión */
+            input, textarea {
+                font-size: 10px !important;
+                line-height: 1.1 !important;
+                padding: 0.5mm !important;
+            }
         }
         @page {
             size: A4;
-            margin: 15mm;
+            margin: 10mm;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div id="app-controls" class="fixed top-0 left-0 w-full bg-white shadow z-50 flex flex-wrap gap-2 items-center justify-center p-4">
@@ -64,6 +97,7 @@
             <input type="file" id="loadInput" accept="application/json" style="display:none">
         </label>
         <button id="printBtn" class="bg-indigo-700 text-white px-3 py-1 rounded hover:bg-indigo-800">Print</button>
+        <button id="pdfBtn" class="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">PDF</button>
         <button id="imageBtn" class="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">Image</button>
         <button id="clearBtn" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Clear</button>
         <span class="ml-4 text-xs text-gray-500">Your data is encrypted locally</span>
@@ -76,51 +110,56 @@
             <button id="modalOk" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">OK</button>
         </div>
     </div>
-    <div id="invoice" class="w-full max-w-4xl mx-auto bg-white shadow-2xl rounded-lg my-8 p-8 md:p-12 mt-24">
+    <div id="invoice" class="w-full max-w-4xl mx-auto bg-white shadow-2xl rounded-lg my-8 p-6 md:p-8 mt-24">
         <form id="cuentaForm" autocomplete="off">
         <!-- Header Section -->
-        <header class="flex justify-between items-start mb-10">
+        <header class="flex justify-between items-start mb-6">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">CUENTA DE COBRO</h1>
-                <input name="number" type="text" class="text-gray-500 text-lg bg-transparent border-b border-gray-200 focus:outline-none w-24" />
+                <input name="number" type="text" class="text-gray-500 text-lg bg-transparent border-b border-gray-200 focus:outline-none w-24" placeholder="No." />
             </div>
             <div class="text-right">
-                <input name="name" type="text" class="text-xl font-semibold text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-56" />
-                <input name="id" type="text" class="text-gray-500 bg-transparent border-b border-gray-200 focus:outline-none w-40 ml-2" />
+                <input name="name" type="text" class="text-xl font-semibold text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-56" placeholder="Nombre completo" />
+                <input name="id" type="text" class="text-gray-500 bg-transparent border-b border-gray-200 focus:outline-none w-40 ml-2" placeholder="Identificación" />
             </div>
         </header>
         <!-- Billing Information Section -->
-        <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
             <div>
-                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">DEBE A</h3>
-                <input name="billTo" type="text" class="text-lg font-medium text-gray-800 bg-transparent border-b border-gray-200 focus:outline-none w-full" />
-                <input name="billToId" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full" />
-                <input name="billToAddress" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full" />
-                <input name="billToCity" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full" />
-                <input name="billToPhone" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full" />
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">DEBE A</h3>
+                <input name="billTo" type="text" class="text-lg font-medium text-gray-800 bg-transparent border-b border-gray-200 focus:outline-none w-full mb-1" placeholder="Nombre del cliente" />
+                <input name="billToId" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full mb-1" placeholder="Identificación del cliente" />
+                <input name="billToAddress" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full mb-1" placeholder="Dirección" />
+                <input name="billToCity" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full mb-1" placeholder="Ciudad" />
+                <input name="billToPhone" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full" placeholder="Teléfono" />
             </div>
             <div class="md:text-right">
-                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">PARA</h3>
-                <input name="clientName" type="text" class="text-lg font-medium text-gray-800 bg-transparent border-b border-gray-200 focus:outline-none w-full text-right" />
-                <input name="clientId" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full text-right" />
-                <div class="mt-4">
-                    <span class="text-sm text-gray-500">Fecha de Emisión: </span><input name="issueDate" type="date" class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-40 text-right" />
-                    <br>
-                    <span class="text-sm text-gray-500">Periodo: </span><input name="period" type="text" class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-56 text-right" />
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">PARA</h3>
+                <input name="clientName" type="text" class="text-lg font-medium text-gray-800 bg-transparent border-b border-gray-200 focus:outline-none w-full text-right mb-1" placeholder="Empresa" />
+                <input name="clientId" type="text" class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full text-right mb-1" placeholder="NIT" />
+                <div class="mt-3">
+                    <div class="mb-1">
+                        <span class="text-sm text-gray-500">Fecha de Emisión: </span>
+                        <input name="issueDate" type="date" class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-40 text-right" />
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Periodo: </span>
+                        <input name="period" type="text" class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-56 text-right" placeholder="Periodo de trabajo" />
+                    </div>
                 </div>
             </div>
         </div>
         <!-- Items Table Section -->
-        <div>
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Detalles del Servicio</h3>
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Detalles del Servicio</h3>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse" id="itemsTable">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase">Concepto</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase text-center">Horas</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase text-right">Tarifa por Hora</th>
-                            <th class="p-4 text-sm font-semibold text-gray-600 uppercase text-right">Total</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600 uppercase">Concepto</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600 uppercase text-center">Horas</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600 uppercase text-right">Tarifa por Hora</th>
+                            <th class="p-3 text-sm font-semibold text-gray-600 uppercase text-right">Total</th>
                             <th class="no-print"></th>
                         </tr>
                     </thead>
@@ -132,38 +171,39 @@
             </div>
         </div>
         <!-- Total and Payment Information Section -->
-        <div class="mt-8">
+        <div class="mb-6">
             <div class="w-full">
-                <div class="flex justify-between items-center bg-gray-800 text-white p-6 rounded-t-lg">
+                <div class="flex justify-between items-center bg-gray-800 text-white p-4 rounded-t-lg">
                     <span class="text-xl font-bold">Total a Pagar</span>
-                    <span class="text-3xl font-bold" id="totalAmount"></span>
+                    <span class="text-2xl font-bold" id="totalAmount"></span>
                 </div>
             </div>
-            <div class="w-full bg-gray-50 p-4 rounded-b-lg border border-gray-200">
+            <div class="w-full bg-gray-50 p-3 rounded-b-lg border border-gray-200">
                 <p class="text-sm font-semibold text-gray-700 mb-2">Información de Pago:</p>
                 <div class="flex flex-col gap-2 md:flex-row md:gap-6">
                   <div class="flex items-center gap-1 w-full md:w-1/3">
                     <span class="text-xs text-gray-500 whitespace-nowrap">Banco:</span>
-                    <input id="bank" name="bank" type="text" class="text-sm text-gray-600 bg-transparent border-b-2 border-gray-200 focus:outline-none w-24 md:w-24 lg:w-28" />
+                    <input id="bank" name="bank" type="text" class="text-sm text-gray-600 bg-transparent border-b-2 border-gray-200 focus:outline-none w-24 md:w-24 lg:w-28" placeholder="Banco" />
                   </div>
                   <div class="flex items-center gap-1 w-full md:w-1/3">
                     <span class="text-xs text-gray-500 whitespace-nowrap">Tipo de Cuenta:</span>
-                    <input id="accountType" name="accountType" type="text" class="text-sm text-gray-600 bg-transparent border-b-2 border-gray-200 focus:outline-none w-20 md:w-20 lg:w-24" />
+                    <input id="accountType" name="accountType" type="text" class="text-sm text-gray-600 bg-transparent border-b-2 border-gray-200 focus:outline-none w-20 md:w-20 lg:w-24" placeholder="Ahorros" />
                   </div>
                   <div class="flex items-center gap-1 w-full md:w-1/3">
                     <span class="text-xs text-gray-500 whitespace-nowrap">Número de Cuenta:</span>
-                    <input id="accountNumber" name="accountNumber" type="text" class="text-sm text-gray-600 bg-transparent border-b-2 border-gray-200 focus:outline-none w-32 md:w-32 lg:w-36" />
+                    <input id="accountNumber" name="accountNumber" type="text" class="text-sm text-gray-600 bg-transparent border-b-2 border-gray-200 focus:outline-none w-32 md:w-32 lg:w-36" placeholder="Número" />
                   </div>
                 </div>
             </div>
         </div>
         <!-- Footer and Legal Declarations Section -->
-        <footer class="mt-12 pt-8 border-t border-gray-200">
+        <footer class="pt-4 border-t border-gray-200">
             <h4 class="text-sm font-semibold text-gray-600 mb-2">Declaraciones y Cumplimiento</h4>
-            <textarea name="declaration" class="text-xs text-gray-500 mb-4 w-full bg-transparent border-b border-gray-200 resize-none overflow-hidden" rows="2"></textarea>
-            <div class="mt-8 text-center">
-                <div class="w-48 h-12 mx-auto mb-2"><!-- Placeholder for signature --></div>
-                <input name="signature" type="text" class="border-t border-gray-400 w-64 mx-auto pt-2 text-sm font-medium text-gray-800 text-center bg-transparent" />
+            <textarea name="declaration" class="text-xs text-gray-500 mb-3 w-full bg-transparent border-b border-gray-200 resize-none overflow-hidden" rows="2" placeholder="Declaraciones legales"></textarea>
+            <div class="mt-4 text-center">
+                <div id="signatureImageContainer" class="w-48 h-16 mx-auto mb-2"><!-- Placeholder for signature image --></div>
+                <input type="file" id="signatureImageInput" accept="image/*" class="no-print mx-auto mb-2" />
+                <input name="signature" type="text" class="border-t border-gray-400 w-64 mx-auto pt-2 text-sm font-medium text-gray-800 text-center bg-transparent" placeholder="Firma autorizada" />
                 <p class="text-xs text-gray-500">Firma Autorizada</p>
             </div>
         </footer>

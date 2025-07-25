@@ -1,3 +1,8 @@
+import { autoResizeTextarea, toggleExportElements, calculateRowTotal } from './utils.js';
+
+let currentPassword = '';
+let currentData = null;
+
 // Limpia sesión, localStorage y recarga el JSON por defecto
 function clearAndReload() {
     sessionStorage.removeItem('cuentaPassword');
@@ -8,8 +13,6 @@ function clearAndReload() {
     loadDefaultData();
     showModal('Datos restablecidos a los valores por defecto.');
 }
-let currentPassword = '';
-let currentData = null;
 
 // Cargar datos por defecto desde defaultData.json con manejo de errores
 async function loadDefaultData() {
@@ -36,8 +39,6 @@ function autoSave() {
     const json = JSON.stringify(data);
     localStorage.setItem('encryptedBill', CryptoJS.AES.encrypt(json, currentPassword).toString());
 }
-
-import { autoResizeTextarea, toggleExportElements, calculateRowTotal } from './utils.js';
 
 function getFormData() {
     const form = document.getElementById('cuentaForm');
@@ -107,11 +108,18 @@ function saveImage() {
         return;
     }
     toggleExportElements(false);
+    
+    // Ajustar temporalmente el estilo para una mejor captura
+    const originalStyle = invoice.style.cssText;
+    invoice.style.cssText += 'max-width: 210mm; width: 210mm; margin: 0; padding: 15mm; box-sizing: border-box;';
+    
     html2canvas(invoice, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        width: invoice.scrollWidth,
+        height: invoice.scrollHeight
     }).then(canvas => {
         canvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
@@ -127,6 +135,73 @@ function saveImage() {
         });
     }).catch(err => {
         showModal('Error generating image: ' + (err.message || err));
+    }).finally(() => {
+        // Restaurar estilo original
+        invoice.style.cssText = originalStyle;
+        toggleExportElements(true);
+    });
+}
+
+// Export invoice as PDF using html2canvas and jsPDF
+function savePDF() {
+    const invoice = document.getElementById('invoice');
+    if (!invoice) {
+        showModal('Invoice element not found.');
+        return;
+    }
+    
+    // Obtener clase jsPDF correctamente
+    const jsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
+    if (!jsPDFClass) {
+        showModal('PDF library not loaded.');
+        return;
+    }
+    
+    toggleExportElements(false);
+    
+    html2canvas(invoice, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: invoice.scrollWidth,
+        height: invoice.scrollHeight
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDFClass('p', 'mm', 'a4');
+        
+        // Limpiar metadatos para evitar que aparezca host o creator por defecto
+        pdf.setProperties({
+            title: 'Cuenta de Cobro',
+            author: currentData?.name || '',
+            subject: '',
+            keywords: '',
+            creator: ''
+        });
+        
+        // Calcular dimensiones para ajustar a A4
+        const imgWidth = 180; // mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        
+        let position = 15; // margen superior
+        
+        // Agregar la primera página
+        pdf.addImage(imgData, 'PNG', 15, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        // Si el contenido es más alto que una página, agregar páginas adicionales
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight + 15;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 15, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        
+        pdf.save('cuenta_cobro.pdf');
+    }).catch(err => {
+        showModal('Error generating PDF: ' + (err.message || err));
     }).finally(() => {
         toggleExportElements(true);
     });
@@ -204,6 +279,11 @@ function fillForm(data) {
     tbody.innerHTML = '';
     (data.items || []).forEach(addRow);
     updateTotals();
+    // Mostrar imagen de firma si existe
+    if (data.signatureImage) {
+        const container = document.getElementById('signatureImageContainer');
+        container.innerHTML = `<img src="${data.signatureImage}" style="max-width:100%; max-height:100%;" />`;
+    }
 }
 
 // Load from localStorage on password entry
@@ -229,11 +309,11 @@ function tryLoadFromStorage() {
 
 function addRow(item = {}) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><input name="concept" type="text" class="p-2 w-full bg-transparent border-b border-gray-200" value="${item.concept || ''}" /></td>
-        <td><input name="hours" type="number" class="p-2 w-20 text-center bg-transparent border-b border-gray-200" value="${item.hours || 0}" min="0" /></td>
-        <td><input name="rate" type="number" class="p-2 w-28 text-right bg-transparent border-b border-gray-200" value="${item.rate || 0}" min="0" /></td>
-        <td class="text-right font-semibold"><span class="row-total"></span></td>
-        <td class="no-print"><button type="button" class="text-red-500 delete-row">🗑️</button></td>`;
+    tr.innerHTML = `<td><input name="concept" type="text" class="p-2 w-full bg-transparent border-b border-gray-200 focus:outline-none" value="${item.concept || ''}" placeholder="Descripción del servicio" /></td>
+        <td><input name="hours" type="number" class="p-2 w-20 text-center bg-transparent border-b border-gray-200 focus:outline-none" value="${item.hours || 0}" min="0" step="0.5" /></td>
+        <td><input name="rate" type="number" class="p-2 w-28 text-right bg-transparent border-b border-gray-200 focus:outline-none" value="${item.rate || 0}" min="0" step="1000" /></td>
+        <td class="text-right font-semibold p-2"><span class="row-total"></span></td>
+        <td class="no-print p-2"><button type="button" class="text-red-500 hover:text-red-700 delete-row">🗑️</button></td>`;
     document.getElementById('itemsBody').appendChild(tr);
     updateRowTotal(tr);
     attachRowListeners(tr);
@@ -300,6 +380,7 @@ async function init() {
     document.getElementById('loadInput').addEventListener('change', loadFile);
     document.getElementById('printBtn').addEventListener('click', () => window.print());
     document.getElementById('imageBtn').addEventListener('click', saveImage);
+    document.getElementById('pdfBtn')?.addEventListener('click', savePDF);
     document.getElementById('clearBtn').addEventListener('click', clearAndReload);
     document.getElementById('modalOk').addEventListener('click', closeModal);
     document.getElementById('addRowBtn').addEventListener('click', () => addRow());
@@ -310,9 +391,20 @@ async function init() {
     document.getElementById('password').addEventListener('input', tryLoadFromStorage);
 
     // Auto resize textareas
-document.querySelectorAll('textarea').forEach(t => {
+    document.querySelectorAll('textarea').forEach(t => {
         autoResizeTextarea(t);
         t.addEventListener('input', () => autoResizeTextarea(t));
+    });
+    // Firma como imagen: carga y muestra en contenedor
+    const sigInput = document.getElementById('signatureImageInput');
+    sigInput?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        const container = document.getElementById('signatureImageContainer');
+        container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%;" />`;
+        // Guardar en datos actuales para persistir si es necesario
+        if (currentData) currentData.signatureImage = url;
     });
 }
 
