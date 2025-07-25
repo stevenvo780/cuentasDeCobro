@@ -99,113 +99,7 @@ function exportJSONMemory() {
 
 // Show or hide controls that should not appear in exported images
 
-
-// Export invoice as an image using html2canvas
-function saveImage() {
-    const invoice = document.getElementById('invoice');
-    if (!invoice) {
-        showModal('Invoice element not found.');
-        return;
-    }
-    toggleExportElements(false);
-    
-    // Ajustar temporalmente el estilo para una mejor captura
-    const originalStyle = invoice.style.cssText;
-    invoice.style.cssText += 'max-width: 210mm; width: 210mm; margin: 0; padding: 15mm; box-sizing: border-box;';
-    
-    html2canvas(invoice, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: invoice.scrollWidth,
-        height: invoice.scrollHeight
-    }).then(canvas => {
-        canvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'cuenta_cobro.png';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-        });
-    }).catch(err => {
-        showModal('Error generating image: ' + (err.message || err));
-    }).finally(() => {
-        // Restaurar estilo original
-        invoice.style.cssText = originalStyle;
-        toggleExportElements(true);
-    });
-}
-
-// Export invoice as PDF using html2canvas and jsPDF
-function savePDF() {
-    const invoice = document.getElementById('invoice');
-    if (!invoice) {
-        showModal('Invoice element not found.');
-        return;
-    }
-    
-    // Obtener clase jsPDF correctamente
-    const jsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
-    if (!jsPDFClass) {
-        showModal('PDF library not loaded.');
-        return;
-    }
-    
-    toggleExportElements(false);
-    
-    html2canvas(invoice, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: invoice.scrollWidth,
-        height: invoice.scrollHeight
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDFClass('p', 'mm', 'a4');
-        
-        // Limpiar metadatos para evitar que aparezca host o creator por defecto
-        pdf.setProperties({
-            title: 'Cuenta de Cobro',
-            author: currentData?.name || '',
-            subject: '',
-            keywords: '',
-            creator: ''
-        });
-        
-        // Calcular dimensiones para ajustar a A4
-        const imgWidth = 180; // mm
-        const pageHeight = 297; // A4 height in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        
-        let position = 15; // margen superior
-        
-        // Agregar la primera página
-        pdf.addImage(imgData, 'PNG', 15, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
-        // Si el contenido es más alto que una página, agregar páginas adicionales
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight + 15;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 15, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-        
-        pdf.save('cuenta_cobro.pdf');
-    }).catch(err => {
-        showModal('Error generating PDF: ' + (err.message || err));
-    }).finally(() => {
-        toggleExportElements(true);
-    });
-}
+// Se eliminaron las funciones saveImage y savePDF
 
 function loadFile(evt) {
     let password = document.getElementById('password').value;
@@ -319,11 +213,6 @@ function addRow(item = {}) {
     attachRowListeners(tr);
 }
 
-function deleteRow(tr) {
-    tr.remove();
-    updateTotals();
-    autoSave();
-}
 
 function updateRowTotal(tr) {
     const hours = tr.querySelector('input[name=hours]').value;
@@ -379,8 +268,6 @@ async function init() {
     document.getElementById('exportBtn').addEventListener('click', exportJSONMemory);
     document.getElementById('loadInput').addEventListener('change', loadFile);
     document.getElementById('printBtn').addEventListener('click', () => window.print());
-    document.getElementById('imageBtn').addEventListener('click', saveImage);
-    document.getElementById('pdfBtn')?.addEventListener('click', savePDF);
     document.getElementById('clearBtn').addEventListener('click', clearAndReload);
     document.getElementById('modalOk').addEventListener('click', closeModal);
     document.getElementById('addRowBtn').addEventListener('click', () => addRow());
