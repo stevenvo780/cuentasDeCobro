@@ -1,0 +1,210 @@
+/* styles.css extraído de index.html */
+.signature-input-fix {
+    min-height: 2.2em;
+    line-height: 1.5;
+    padding-top: 6px;
+    padding-bottom: 3px;
+}
+
+input[name="name"] {
+    height: auto !important;
+    min-height: 3em !important;
+    line-height: normal !important;
+    padding: 0.5em 0.25em !important;
+    overflow: visible !important;
+    display: inline-block !important;
+    box-sizing: border-box !important;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.break-all,
+.break-word,
+.wrap {
+    word-break: break-word;
+    white-space: normal !important;
+}
+
+.nowrap {
+    white-space: nowrap !important;
+}
+
+.overflow-visible {
+    overflow: visible !important;
+}
+
+td,
+th {
+    word-break: break-word;
+    white-space: normal;
+}
+
+input,
+textarea {
+    word-break: break-word;
+    white-space: normal;
+    min-height: 2em;
+    line-height: 1.4;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+@media print {
+    #app-controls,
+    #modal {
+        display: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .print-hide {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+        font-size: 11px;
+        line-height: 1.2;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        margin: 0;
+        padding: 0;
+    }
+    .shadow-2xl {
+        box-shadow: none !important;
+    }
+    .rounded-lg {
+        border-radius: 0 !important;
+    }
+    .mt-24 {
+        margin-top: 0 !important;
+    }
+    .my-8 {
+        margin: 0 !important;
+    }
+    .overflow-x-auto {
+        overflow: visible !important;
+    }
+    #invoice {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 8mm !important;
+        box-sizing: border-box !important;
+    }
+    .text-3xl {
+        font-size: 18px !important;
+    }
+    .text-xl {
+        font-size: 14px !important;
+    }
+    .text-lg {
+        font-size: 12px !important;
+    }
+    .text-sm {
+        font-size: 10px !important;
+    }
+    .text-xs {
+        font-size: 9px !important;
+    }
+    /* Reducir márgenes y espaciado */
+    header {
+        margin-bottom: 4mm !important;
+    }
+    .mb-10 {
+        margin-bottom: 4mm !important;
+    }
+    .mb-12 {
+        margin-bottom: 4mm !important;
+    }
+    .mt-8 {
+        margin-top: 3mm !important;
+    }
+    .mt-12 {
+        margin-top: 4mm !important;
+    }
+    .mb-4 {
+        margin-bottom: 2mm !important;
+    }
+    .p-4 {
+        padding: 2mm !important;
+    }
+    .p-6 {
+        padding: 3mm !important;
+    }
+    .gap-8 {
+        gap: 2mm !important;
+    }
+    /* Tabla más compacta */
+    table th,
+    table td {
+        word-break: break-word !important;
+        white-space: normal !important;
+        max-width: 100%;
+    }
+    /* Ajuste de input de nombre en impresión */
+    input,
+    textarea {
+        font-size: 10px !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        max-width: 100%;
+        min-height: 1.5em !important;
+        line-height: 1.15 !important;
+        padding-top: 1.5px !important;
+        padding-bottom: 1.5px !important;
+        vertical-align: middle !important;
+        box-sizing: border-box !important;
+    }
+    input[name="name"] {
+        height: auto !important;
+        min-height: 2.5em !important;
+        line-height: normal !important;
+        padding: 0.4em 0.2em !important;
+        overflow: visible !important;
+    }
+}
+
+@page {
+    size: A4;
+    margin: 10mm;
+}
+
+.nombre-div {
+    display: block;
+    width: 14rem;
+    min-height: 2.5em;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #e5e7eb;
+    outline: none;
+    margin-bottom: 0.25em;
+    line-height: 1.2;
+    padding: 0.5em 0.25em 0.5em 0.25em;
+    box-sizing: border-box;
+}
+
+.nombre-div:empty:before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+}
+
+@media print {
+    .nombre-div {
+        min-height: 2.2em;
+        font-size: 1.1rem;
+        line-height: 1.1;
+        padding: 0.4em 0.2em 0.4em 0.2em;
+    }
+}
