@@ -264,35 +264,28 @@ async function init() {
     }
     updateTotals();
 
-    document.getElementById('saveBtn').addEventListener('click', saveFile);
-    document.getElementById('exportBtn').addEventListener('click', exportJSONMemory);
-    document.getElementById('loadInput').addEventListener('change', loadFile);
-    document.getElementById('printBtn').addEventListener('click', () => window.print());
-    document.getElementById('clearBtn').addEventListener('click', clearAndReload);
-    document.getElementById('modalOk').addEventListener('click', closeModal);
-    document.getElementById('addRowBtn').addEventListener('click', () => addRow());
-    document.getElementById('cuentaForm').addEventListener('input', () => {
-        updateTotals();
-        autoSave();
+    // Floating and modal controls
+    document.getElementById('printFloatBtn').addEventListener('click', () => window.print());
+    document.getElementById('optionsBtn').addEventListener('click', () => {
+        const modal = document.getElementById('optionsModal');
+        const passInput = document.getElementById('modalPassword');
+        const saved = sessionStorage.getItem('cuentaPassword');
+        passInput.value = saved ? '*****' : '';
+        modal.classList.remove('hidden');
     });
-    document.getElementById('password').addEventListener('input', tryLoadFromStorage);
-
-    // Auto resize textareas
-    document.querySelectorAll('textarea').forEach(t => {
-        autoResizeTextarea(t);
-        t.addEventListener('input', () => autoResizeTextarea(t));
+    document.getElementById('optionsClose').addEventListener('click', () => {
+        document.getElementById('optionsModal').classList.add('hidden');
     });
-    // Firma como imagen: carga y muestra en contenedor
-    const sigInput = document.getElementById('signatureImageInput');
-    sigInput?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        const container = document.getElementById('signatureImageContainer');
-        container.innerHTML = `<img src="${url}" style="max-width:100%; max-height:100%;" />`;
-        // Guardar en datos actuales para persistir si es necesario
-        if (currentData) currentData.signatureImage = url;
+    document.getElementById('modalSave').addEventListener('click', () => {
+        const val = document.getElementById('modalPassword').value;
+        currentPassword = val;
+        if (val) {
+            sessionStorage.setItem('cuentaPassword', val);
+        } else {
+            sessionStorage.removeItem('cuentaPassword');
+        }
+        showModal('Clave de acceso guardada.');
     });
+    document.getElementById('modalExport').addEventListener('click', exportJSONMemory);
+    document.getElementById('modalClear').addEventListener('click', clearAndReload);
 }
-
-export { autoResizeTextarea, toggleExportElements, calculateRowTotal };

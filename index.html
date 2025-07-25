@@ -16,20 +16,29 @@
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div id="app-controls"
-        class="fixed top-0 left-0 w-full bg-white shadow z-50 flex flex-wrap gap-2 items-center justify-center p-4">
-        <input id="password" type="password" placeholder="Access key" class="border rounded px-2 py-1 mr-2"
-            style="min-width:150px;">
-        <button id="saveBtn" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Save</button>
-        <button id="exportBtn" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Export
-            JSON</button>
-        <label class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 cursor-pointer">
-            Load
-            <input type="file" id="loadInput" accept="application/json" style="display:none">
-        </label>
-        <button id="printBtn" class="bg-indigo-700 text-white px-3 py-1 rounded hover:bg-indigo-800">Print</button>
-        <button id="clearBtn" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Clear</button>
-        <span class="ml-4 text-xs text-gray-500">Your data is encrypted locally</span>
+    <!-- Floating Print Button -->
+    <button id="printFloatBtn" class="fixed bottom-4 right-4 bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:bg-indigo-800 z-50 print:hidden">
+        🖨️
+    </button>
+    <!-- Options Button -->
+    <button id="optionsBtn" class="fixed top-4 right-4 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-900 z-50 print:hidden">
+        ☰
+    </button>
+    <!-- Options Modal -->
+    <div id="optionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h2 class="text-lg font-semibold mb-4">Opciones</h2>
+            <div class="mb-4">
+                <label class="block text-sm text-gray-700 mb-1">Clave de acceso:</label>
+                <input id="modalPassword" type="password" class="w-full border rounded px-2 py-1" placeholder="Ingrese o verifique..." />
+            </div>
+            <div class="space-y-2">
+                <button id="modalSave" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Guardar</button>
+                <button id="modalExport" class="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Exportar JSON</button>
+                <button id="modalClear" class="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Limpiar</button>
+            </div>
+            <button id="optionsClose" class="mt-4 w-full bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cerrar</button>
+        </div>
     </div>
 
     <!-- Modal for notifications -->
