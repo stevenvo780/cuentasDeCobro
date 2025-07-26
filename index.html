@@ -10,6 +10,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        @media print {
+
+            /* Simplifica el layout de fecha y periodo para print */
+            .print-align-row {
+                margin-bottom: 0.5rem !important;
+            }
+
+            .print-align-input {
+                width: 12rem !important;
+                margin-left: 1rem !important;
+            }
+
+            /* Asegura que la columna derecha tenga padding */
+            .md\\:text-right {
+                padding-right: 1rem !important;
+            }
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -17,11 +36,13 @@
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <!-- Floating Print Button -->
-    <button id="printFloatBtn" class="fixed bottom-4 right-4 bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:bg-indigo-800 z-50 print:hidden">
+    <button id="printFloatBtn"
+        class="fixed bottom-4 right-4 bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:bg-indigo-800 z-50 print:hidden">
         🖨️
     </button>
     <!-- Options Button -->
-    <button id="optionsBtn" class="fixed top-4 right-4 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-900 z-50 print:hidden">
+    <button id="optionsBtn"
+        class="fixed top-4 right-4 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-gray-900 z-50 print:hidden">
         ☰
     </button>
     <!-- Options Modal -->
@@ -30,14 +51,19 @@
             <h2 class="text-lg font-semibold mb-4">Opciones</h2>
             <div class="mb-4">
                 <label class="block text-sm text-gray-700 mb-1">Clave de acceso:</label>
-                <input id="modalPassword" type="password" class="w-full border rounded px-2 py-1" placeholder="Ingrese o verifique..." />
+                <input id="modalPassword" type="password" class="w-full border rounded px-2 py-1"
+                    placeholder="Ingrese o verifique..." />
             </div>
             <div class="space-y-2">
-                <button id="modalSave" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Guardar</button>
-                <button id="modalExport" class="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Exportar JSON</button>
-                <button id="modalClear" class="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Limpiar</button>
+                <button id="modalSave"
+                    class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Guardar</button>
+                <button id="modalExport"
+                    class="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Exportar JSON</button>
+                <button id="modalClear"
+                    class="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Limpiar</button>
             </div>
-            <button id="optionsClose" class="mt-4 w-full bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cerrar</button>
+            <button id="optionsClose"
+                class="mt-4 w-full bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cerrar</button>
         </div>
     </div>
 
@@ -88,15 +114,15 @@
                         class="text-gray-600 bg-transparent border-b border-gray-200 focus:outline-none w-full text-right mb-1"
                         placeholder="NIT" />
                     <div class="mt-3">
-                        <div class="mb-1">
+                        <div class="mb-1 flex items-center gap-2 justify-end print-align-row">
                             <span class="text-sm text-gray-500">Fecha de Emisión: </span>
                             <input name="issueDate" type="date"
-                                class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-40 text-right" />
+                                class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-54 text-right print-align-input" />
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2 justify-end print-align-row">
                             <span class="text-sm text-gray-500">Periodo: </span>
                             <input name="period" type="text"
-                                class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-56 text-right"
+                                class="font-medium text-gray-700 bg-transparent border-b border-gray-200 focus:outline-none w-54 text-right print-align-input"
                                 placeholder="Periodo de trabajo" />
                         </div>
                     </div>
@@ -165,7 +191,8 @@
                     rows="2" placeholder="Declaraciones legales"></textarea>
                 <div class="mt-4 text-center">
                     <div id="signatureImageContainer" class="w-48 h-16 mx-auto mb-2">
-                        <!-- Placeholder for signature image --></div>
+                        <!-- Placeholder for signature image -->
+                    </div>
                     <input type="file" id="signatureImageInput" accept="image/*" class="no-print mx-auto mb-2" />
                     <input name="signature" type="text"
                         class="border-t border-gray-400 w-64 mx-auto text-sm font-medium text-gray-800 text-center bg-transparent signature-input-fix"

@@ -285,6 +285,7 @@ async function init() {
             sessionStorage.removeItem('cuentaPassword');
         }
         showModal('Clave de acceso guardada.');
+        document.getElementById('optionsModal').classList.add('hidden');
     });
     document.getElementById('modalExport').addEventListener('click', exportJSONMemory);
     document.getElementById('modalClear').addEventListener('click', clearAndReload);
