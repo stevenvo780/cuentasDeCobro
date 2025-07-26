@@ -87,14 +87,20 @@ function saveFile() {
 }
 
 function exportJSONMemory() {
-    if (!currentData) {
-        showModal('No data in memory.');
-        return;
-    }
-    const json = JSON.stringify(currentData, null, 2);
-    // Copiar al portapapeles
-    navigator.clipboard.writeText(json);
-    showModal('JSON copied to clipboard!');
+    const data = getFormData();
+    const jsonData = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cuenta_cobro_${data.number || 'sin_numero'}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { 
+        document.body.removeChild(a); 
+        URL.revokeObjectURL(url); 
+    }, 100);
+    showModal('Datos exportados correctamente!');
 }
 
 // Show or hide controls that should not appear in exported images
@@ -287,6 +293,33 @@ async function init() {
         showModal('Clave de acceso guardada.');
         document.getElementById('optionsModal').classList.add('hidden');
     });
+    document.getElementById('modalOk').addEventListener('click', closeModal);
     document.getElementById('modalExport').addEventListener('click', exportJSONMemory);
     document.getElementById('modalClear').addEventListener('click', clearAndReload);
+    document.getElementById('importFileInput').addEventListener('change', importData);
+}
+
+function importData(evt) {
+    const file = evt.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            currentData = data;
+            fillForm(data);
+            updateTotals();
+            if (currentPassword) {
+                sessionStorage.setItem('cuentaData', JSON.stringify(data));
+                autoSave();
+            }
+            showModal('Datos importados correctamente!');
+            document.getElementById('optionsModal').classList.add('hidden');
+        } catch (err) {
+            showModal('Error al importar: archivo JSON inválido.');
+        }
+    };
+    reader.readAsText(file);
+    evt.target.value = ''; // Limpiar input para permitir importar el mismo archivo de nuevo
 }
