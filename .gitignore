@@ -6,4 +6,4 @@ coverage/
 
 # logs
 npm-debug.log*
-
+my_data.json
