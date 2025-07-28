@@ -11,6 +11,7 @@
   "clientId": "NIT 800.000.000-0",
   "issueDate": "2025-07-21",
   "period": "13/06/2025 - 20/07/2025",
+  "project": "Proyecto Ejemplo",
   "items": [
     {
       "concept": "Servicios de Desarrollo y DevOps",

@@ -43,6 +43,8 @@ function autoSave() {
 function getFormData() {
     const form = document.getElementById('cuentaForm');
     const data = Object.fromEntries(new FormData(form));
+    // Ensure new fields like 'project' are captured even if added dynamically
+    data.project = form.querySelector('[name=project]')?.value || '';
     data.items = Array.from(document.querySelectorAll('#itemsBody tr')).map(tr => {
         const inputs = tr.querySelectorAll('input');
         return {
@@ -142,6 +144,7 @@ function loadFile(evt) {
 // Fill form with data
 function fillForm(data) {
     const form = document.getElementById('cuentaForm');
+    // loop through provided data and populate matching fields
     for (const [key, value] of Object.entries(data)) {
         if (key === 'items') continue;
         // Buscar input, textarea o select por name
